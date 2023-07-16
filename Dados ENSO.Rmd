@@ -1,0 +1,49 @@
+---
+title: "Dados Enso"
+author: "MSc Fernando Alves Silveira"
+date: "2023-07-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(rsoi) #El Nino/Southern Oscillation (ENSO) and Related Climate Indices
+library(tidyverse)
+```
+
+# Baixa os dados - ETL
+
+```{r}
+df_clima <- download_oni()
+
+df_clima <- df_clima %>%
+
+ mutate(Fase = case_when(
+  phase == 'Warm Phase/El Nino' ~ 'Quente - El Nino',
+  phase == 'Cool Phase/La Nina' ~ 'Frio - La Nina',
+  phase == 'Neutral Phase' ~ 'Neutral',
+  TRUE ~ NA_character_
+
+ ))
+
+```
+
+## Gráfico
+
+```{r fig.height=8, fig.width=8}
+df_clima_filtro <- df_clima |> 
+  dplyr::filter(Date >= "2018-01-01")
+
+grafico<- df_clima_filtro %>%
+
+ ggplot(aes(x=Date,y=ONI, fill=Fase))+
+ geom_bar(stat = "identity")+
+ theme(legend.position = "bottom")+
+ scale_x_date(date_breaks = "6 month", date_labels = "%m/%y")+
+ labs(title = "Ocean Nino Index", 
+    subtitle = "Fonte: Climate Prediction Center | Elaboração: Fernando Alves Silveira",
+    y="", x="") +
+  theme_bw()
+
+plot(grafico)
+
+```
